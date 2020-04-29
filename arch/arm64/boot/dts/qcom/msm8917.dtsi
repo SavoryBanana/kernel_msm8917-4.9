@@ -1823,6 +1823,10 @@
 	status = "okay";
 };
 
+&apps_iommu {
+	qcom,no-aarch64;
+};
+
 /* GPU overrides */
 &msm_gpu {
 
