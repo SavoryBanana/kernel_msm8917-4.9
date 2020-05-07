@@ -82,6 +82,13 @@ else
 	msm8937-interposer-sdm429-cdp.dtb \
 	msm8937-interposer-sdm429-mtp.dtb
 
+dtb-$(CONFIG_ARCH_MSM8917) += msm8917-sec-j4primelte-sea-open-r01.dtb \
+        msm8917-sec-j4primelte-sea-open-r00.dtb \
+        msm8917-sec-j4primelte-sea-open-r02.dtb \
+        msm8917-sec-j4primelte-sea-open-r03.dtb \
+        msm8917-sec-j4primelte-sea-open-r04.dtb \
+        msm8917-sec-j4primelte-sea-open-r06.dtb
+
 #dtb-$(CONFIG_ARCH_SDM439) += sdm439-mtp.dtb \
 	sdm439-cdp.dtb \
 	sdm439-qrd.dtb \
