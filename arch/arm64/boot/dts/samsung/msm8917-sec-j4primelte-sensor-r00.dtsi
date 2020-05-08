@@ -99,7 +99,7 @@
 			cm36686,cal_skip_adc = <6>;
 			cm36686,cal_fail_adc = <20>;
 			cm36686,default_trim = <3>;
-			cm36686,reg_vdd-supply = <&pm8917_l17>;
+			cm36686,reg_vdd-supply = <&pm8937_l17>;
 			cm36686,vdd_always_on = <1>;
 			cm36686,vled_same_vdd = <1>;
 		};
@@ -121,7 +121,7 @@
 			stk,wait_reg = <0x0F>;
 			stk,ps_thdh = <40>;
 			stk,ps_thdl = <25>;
-			stk,reg_vdd-supply = <&pm8917_l17>;
+			stk,reg_vdd-supply = <&pm8937_l17>;
 			stk,cancel_hi_thd = <35>;
 			stk,cancel_low_thd = <25>;
 			stk,cal_skip_adc = <13>;
@@ -132,7 +132,7 @@
 	};
 };
 
-&pm8917_l17 {
+&pm8937_l17 {
     status = "okay";
     regulator-min-microvolt = <3300000>;
     regulator-max-microvolt = <3300000>;

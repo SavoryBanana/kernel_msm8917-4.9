@@ -36,7 +36,7 @@
 	        compatible = "qcom,actuator";
 		cell-index = <0>;
 		reg = <0x18 0x0>;
-		cam_vaf-supply = <&pm8917_l10>;
+		cam_vaf-supply = <&pm8937_l10>;
 		qcom,cam-vreg-name = "cam_vaf";
 		qcom,cam-vreg-type = <0>;
 		qcom,cam-vreg-min-voltage = <2800000>;
@@ -59,7 +59,7 @@
 		qcom,gpio-req-tbl-num = <0>;
 		qcom,gpio-req-tbl-flags = <0>;
 		qcom,gpio-req-tbl-label = "CAM_VIO";
-		cam_vaf-supply = <&pm8917_l10>;
+		cam_vaf-supply = <&pm8937_l10>;
 		qcom,cam-vreg-name = "cam_vaf";
 		qcom,cam-vreg-type = <0>;
 		qcom,cam-vreg-min-voltage = <2800000>;
@@ -109,7 +109,7 @@
 		qcom,actuator-src = <&actuator0>;	
 		qcom,eeprom-src = <&eeprom0>;
 		qcom,mount-angle = <90>;
-		cam_vaf-supply = <&pm8917_l10>;
+		cam_vaf-supply = <&pm8937_l10>;
 		qcom,cam-vreg-name ="cam_vaf";
 		qcom,cam-vreg-type = <0>;
 		qcom,cam-vreg-min-voltage = <2800000>;
