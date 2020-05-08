@@ -280,6 +280,7 @@
 	};
 
 	eldo2_pm8937: eldo2 {
+		status = "disabled";
 		compatible = "regulator-fixed";
 		regulator-name = "eldo2_pm8937";
 		startup-delay-us = <0>;
