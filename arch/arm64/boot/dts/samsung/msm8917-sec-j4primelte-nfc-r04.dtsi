@@ -19,29 +19,6 @@
 	tlmm: pinctrl@1000000 {
 		/delete-node/ pmx_rd_nfc_int;
 
-		nfc_int_active: nfc_int_active {
-			mux {
-				pins = "gpio46";
-				function = "gpio";
-			};
-			config {
-				pins = "gpio46";
-				drive-strength = <2>;
-				bias-pull-down;
-			};
-		};
-		nfc_int_suspend: suspend  {
-			mux {
-				pins = "gpio46";
-				function = "gpio";
-			};
-			config {
-				pins = "gpio46";
-				drive-strength = <2>;
-				bias-pull-down;
-			};
-		};
-
 		nfc_detect_active: nfc_detect_active {
 			mux {
 				pins = "gpio97";

@@ -299,16 +299,6 @@
 };
 
 /*
-&pm8937_cajon_dig {
-	qcom,cdc-micbias-cfilt-mv = <2800000>;
-	qcom,cfilt_gnd_ref; /* 0x142, bit[1]:0 */
-	qcom,tx2n_int_pullup_en; /* 0x143, bit[3]:1 */
-	qcom,ext_pullup_imp;  /* 0x143, bit[4]:0 */
-	qcom,tx1n_cfilt_ref_sel; /* 0x145, bit[0]:0 */
-};
-*/
-
-/*
 &flash_led {
 	compatible = "qcom,qpnp-flash-led";
 	reg = <0xd300 0x100>;
