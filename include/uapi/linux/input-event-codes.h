@@ -516,6 +516,11 @@
 #define KEY_DEL_EOS		0x1c1
 #define KEY_INS_LINE		0x1c2
 #define KEY_DEL_LINE		0x1c3
+#define KEY_SIDE_GESTURE	0x1c6
+#define KEY_BLACK_UI_GESTURE	0x1c7
+
+#define KEY_SIDE_GESTURE_RIGHT	0x1ca
+#define KEY_SIDE_GESTURE_LEFT	0x1cb
 
 #define KEY_FN			0x1d0
 #define KEY_FN_ESC		0x1d1
@@ -590,6 +595,8 @@
 #define BTN_DPAD_DOWN		0x221
 #define BTN_DPAD_LEFT		0x222
 #define BTN_DPAD_RIGHT		0x223
+
+#define KEY_ENDCALL		0x227
 
 #define KEY_ALS_TOGGLE		0x230	/* Ambient light sensor */
 
@@ -802,6 +809,7 @@
 #define SW_HPHR_OVERCURRENT	0x11  /* set = over current on right hph */
 #define SW_MICROPHONE2_INSERT   0x12  /* set = inserted */
 #define SW_UNSUPPORT_INSERT	0x13  /* set = unsupported device inserted */
+#define SW_GLOVE		0x20
 #define SW_MAX			0x20
 #define SW_CNT			(SW_MAX+1)
 
