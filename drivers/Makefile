@@ -181,3 +181,7 @@ obj-$(CONFIG_ESOC)              += esoc/
 obj-$(CONFIG_FPGA)		+= fpga/
 obj-$(CONFIG_SENSORS_SSC)		+= sensors/
 obj-$(CONFIG_TEE)		+= tee/
+
+ifeq ($(CONFIG_FB_MSM_MDSS_SAMSUNG),y)
+	LINUXINCLUDE	+=  -I$(srctree)/drivers/video/fbdev/msm/samsung/
+endif

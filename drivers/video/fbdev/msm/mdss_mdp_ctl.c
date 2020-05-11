@@ -27,6 +27,9 @@
 #include "mdss_mdp.h"
 #include "mdss_mdp_trace.h"
 #include "mdss_debug.h"
+#if defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
+#include "samsung/ss_dsi_panel_common.h" /* UTIL HEADER */
+#endif
 
 #define MDSS_MDP_QSEED3_VER_DOWNSCALE_LIM 2
 #define NUM_MIXERCFG_REGS 3
@@ -2423,6 +2426,19 @@ static void mdss_mdp_ctl_perf_update(struct mdss_mdp_ctl *ctl,
 	 */
 	if (update_clk) {
 		ATRACE_INT("mdp_clk", clk_rate);
+#if defined(CONFIG_SEC_MSM8917_PROJECT)
+#if defined(CONFIG_SEC_J6PRIMELTE_PROJECT)|| defined(CONFIG_SEC_J4PRIMELTE_PROJECT) || defined(CONFIG_SEC_J4CORELTE_PROJECT)  || defined(CONFIG_SEC_ON5XLLTE_PROJECT)
+/*To do : Case:03611842 ongoing.*/
+		if (clk_rate == 100000000)
+			clk_rate = 145450000;
+		else if (clk_rate == 80000000)
+			clk_rate = 100000000;
+#else
+/*Case:03521199: New CR 2260689*/
+		if (clk_rate == 80000000)
+			clk_rate = 100000000;
+#endif
+#endif
 		mdss_mdp_set_clk_rate(clk_rate, false);
 		pr_debug("update clk rate = %d HZ\n", clk_rate);
 	}
@@ -3662,8 +3678,7 @@ int mdss_mdp_ctl_setup(struct mdss_mdp_ctl *ctl)
 		}
 	}
 
-	rc = mdss_mdp_pp_default_overlay_config(ctl->mfd, ctl->panel_data,
-						true);
+	rc = mdss_mdp_pp_default_overlay_config(ctl->mfd, ctl->panel_data);
 	/*
 	 * Ignore failure of PP config, ctl set-up can succeed.
 	 */
@@ -4054,8 +4069,7 @@ int mdss_mdp_ctl_destroy(struct mdss_mdp_ctl *ctl)
 				     CTL_INTF_EVENT_FLAG_DEFAULT);
 	WARN(rc, "unable to close panel for intf=%d\n", ctl->intf_num);
 
-	(void) mdss_mdp_pp_default_overlay_config(ctl->mfd, ctl->panel_data,
-							false);
+	(void) mdss_mdp_pp_default_overlay_config(ctl->mfd, ctl->panel_data);
 
 	sctl = mdss_mdp_get_split_ctl(ctl);
 	if (sctl) {

@@ -730,14 +730,14 @@ static struct mdss_fence *__create_fence(struct msm_fb_data_type *mfd,
 		pr_err("fb%d ctl power on failed\n", mfd->index);
 		return ERR_PTR(-EPERM);
 	}
-
+#if 0
 	if (fence_type == MDSS_MDP_RETIRE_FENCE)
 		snprintf(fence_name, sizeof(fence_name), "fb%d_retire",
 			mfd->index);
 	else
 		snprintf(fence_name, sizeof(fence_name), "fb%d_release",
 			mfd->index);
-
+#endif
 	if ((fence_type == MDSS_MDP_RETIRE_FENCE) &&
 		(mfd->panel.type == MIPI_CMD_PANEL)) {
 		if (sync_pt_data->timeline_retire) {

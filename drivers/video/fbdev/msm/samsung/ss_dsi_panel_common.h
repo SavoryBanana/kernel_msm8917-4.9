@@ -48,8 +48,8 @@ Copyright (C) 2012, Samsung Electronics. All rights reserved.
 #include <linux/interrupt.h>
 #include <linux/msm-bus.h>
 /*#include <linux/hall.h>*/
-#include <linux/sync.h>
-#include <linux/sw_sync.h>
+#include <../mdss_sync.h>
+/*#include <linux/sw_sync.h>*/
 #include <linux/sched.h>
 #include <linux/dma-buf.h>
 #include <linux/debugfs.h>

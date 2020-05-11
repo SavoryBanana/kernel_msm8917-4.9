@@ -22,6 +22,9 @@
 #include "mdss_dsi.h"
 #include "mdss_edp.h"
 #include "mdss_dsi_phy.h"
+#if defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
+#include "samsung/ss_dsi_panel_common.h"
+#endif
 
 #define MDSS_DSI_DSIPHY_REGULATOR_CTRL_0	0x00
 #define MDSS_DSI_DSIPHY_REGULATOR_CTRL_1	0x04
@@ -1045,6 +1048,11 @@ static void mdss_dsi_8996_phy_config(struct mdss_dsi_ctrl_pdata *ctrl)
 	int j, off, ln, cnt, ln_off;
 	char *ip;
 	void __iomem *base;
+#if defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
+	struct samsung_display_driver_data *vdd;
+
+	vdd = (struct samsung_display_driver_data *)ctrl->panel_data.panel_private;
+#endif
 
 	pd = &(((ctrl->panel_data).panel_info.mipi).dsi_phy_db);
 
@@ -1089,7 +1097,14 @@ static void mdss_dsi_8996_phy_config(struct mdss_dsi_ctrl_pdata *ctrl)
 		}
 
 		/* test str */
-		MIPI_OUTP(base + 0x14, 0x0088);	/* fixed */
+#if defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
+		if(vdd->dsiphy_drive_str)
+			MIPI_OUTP(base + 0x14, vdd->dsiphy_drive_str);
+		else
+			MIPI_OUTP(base + 0x14, 0x0088);	/* fixed */
+#else
+		MIPI_OUTP(base + 0x14, 0x0088); /* fixed */
+#endif
 
 		/* phy timing, 8 * 5 */
 		cnt = 8;
