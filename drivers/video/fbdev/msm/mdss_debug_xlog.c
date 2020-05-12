@@ -631,6 +631,7 @@ static void mdss_xlog_dump_array(struct mdss_debug_base *blk_arr[],
 	u32 len, bool dead, const char *name, bool dump_dbgbus,
 	bool dump_vbif_dbgbus, bool dump_dsi_dbgbus)
 {
+#if !defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
 	int i;
 
 	for (i = 0; i < len; i++) {
@@ -638,6 +639,7 @@ static void mdss_xlog_dump_array(struct mdss_debug_base *blk_arr[],
 			mdss_dump_reg_by_ranges(blk_arr[i],
 				mdss_dbg_xlog.enable_reg_dump);
 	}
+#endif
 
 #if defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
 	struct samsung_display_driver_data *vdd = samsung_get_vdd();

@@ -2225,7 +2225,7 @@ static int mdss_dsi_cmd_dma_tx(struct mdss_dsi_ctrl_pdata *ctrl,
 			&(ctrl->dma_addr), tp->start, DMA_TO_DEVICE);
 
 #if defined(CONFIG_FB_MSM_MDSS_SAMSUNG)
-		if (IS_ERR_VALUE(ret)) {
+		if (IS_ERR_VALUE((unsigned long)ret)) {
 			if (!in_interrupt()) {
 				for (retry_cnt = 0; retry_cnt < 62 ; retry_cnt++) {
 					/* To wait free page by memory reclaim*/
@@ -2235,7 +2235,7 @@ static int mdss_dsi_cmd_dma_tx(struct mdss_dsi_ctrl_pdata *ctrl,
 					ret = mdss_smmu_dsi_map_buffer(tp->dmap, domain, ctrl->dma_size,
 						&(ctrl->dma_addr), tp->start, DMA_TO_DEVICE);
 
-					if (!IS_ERR_VALUE(ret))
+					if (!IS_ERR_VALUE((unsigned long)ret))
 						break;
 				}
 			}
@@ -2506,7 +2506,7 @@ void mdss_dsi_samsung_poc_perf_mode_ctl(struct mdss_dsi_ctrl_pdata *ctrl, int en
 
 			if (ctrl->mdss_util->iommu_ctrl) {
 				rc = ctrl->mdss_util->iommu_ctrl(1);
-				if (IS_ERR_VALUE(rc)) {
+				if (IS_ERR_VALUE((unsigned long)rc)) {
 					pr_err("IOMMU attach failed\n");
 					return;
 				}

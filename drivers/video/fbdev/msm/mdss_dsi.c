@@ -4740,7 +4740,7 @@ int dsi_panel_device_register(struct platform_device *ctrl_pdev,
 		return rc;
 	}
 
-	rc = msm_dss_config_vreg(&ctrl_pdev->dev,
+	rc = msm_mdss_config_vreg(&ctrl_pdev->dev,
 		ctrl_pdata->panel_power_data_lp11.vreg_config,
 		ctrl_pdata->panel_power_data_lp11.num_vreg, 1);
 	if (rc) {
@@ -4755,7 +4755,7 @@ int dsi_panel_device_register(struct platform_device *ctrl_pdev,
 			__func__, __mdss_dsi_pm_name(DSI_PANEL_PM_LP11_OFF), rc);
 		return rc;
 	}
-	rc = msm_dss_config_vreg(&ctrl_pdev->dev,
+	rc = msm_mdss_config_vreg(&ctrl_pdev->dev,
 		ctrl_pdata->panel_power_data_lp11_off.vreg_config,
 		ctrl_pdata->panel_power_data_lp11_off.num_vreg, 1);
 	if (rc) {

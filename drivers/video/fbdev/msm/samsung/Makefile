@@ -4,8 +4,8 @@
 
 obj-y += ss_self_display_common.o
 obj-y += ss_dsi_panel_sysfs.o
-obj-y += ss_dsi_panel_debug.o
 obj-y += ss_dsi_panel_common.o
+obj-y += ss_dsi_panel_debug.o
 obj-y += ss_dsi_mdnie_lite_common.o
 obj-y += ss_dsi_smart_dimming_common.o
 obj-y += ss_regulator_common.o
