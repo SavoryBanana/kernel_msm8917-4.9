@@ -129,7 +129,7 @@ struct s2mu005_fuelgauge_data {
 	struct i2c_client       *pmic;
 	struct mutex            fuelgauge_mutex;
 	struct s2mu005_platform_data *pdata;
-	struct power_supply	psy_fg;
+	struct power_supply	*psy_fg;
 	/* struct delayed_work isr_work; */
 
 	int cable_type;

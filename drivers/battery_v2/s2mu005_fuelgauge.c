@@ -1680,7 +1680,8 @@ static int s2mu005_fg_get_property(struct power_supply *psy,
 		enum power_supply_property psp,
 		union power_supply_propval *val)
 {
-	struct s2mu005_fuelgauge_data *fuelgauge = container_of(psy, struct s2mu005_fuelgauge_data, psy_fg);
+	struct s2mu005_fuelgauge_data *fuelgauge =
+	    power_supply_get_drvdata(psy);
 	u8 temp = 0;
 	union power_supply_propval ui_soc_val;
 	union power_supply_propval cable_type_val;
@@ -1872,7 +1873,8 @@ static int s2mu005_fg_set_property(struct power_supply *psy,
                             enum power_supply_property psp,
                             const union power_supply_propval *val)
 {
-	struct s2mu005_fuelgauge_data *fuelgauge = container_of(psy, struct s2mu005_fuelgauge_data, psy_fg);
+	struct s2mu005_fuelgauge_data *fuelgauge =
+	    power_supply_get_drvdata(psy);
 	u8 temp = 0;
 
 	switch (psp) {
@@ -2186,13 +2188,22 @@ static int s2mu005_fuelgauge_parse_dt(struct s2mu005_fuelgauge_data *fuelgauge)
 #define s2mu005_fuelgauge_match_table NULL
 #endif /* CONFIG_OF */
 
+static const struct power_supply_desc s2mu005_fuelgauge_power_supply_desc = {
+	.name = "s2mu005-fuelgauge",
+	.type = SEC_BATTERY_CABLE_UNKNOWN,
+	.properties = s2mu005_fuelgauge_props,
+	.num_properties = ARRAY_SIZE(s2mu005_fuelgauge_props),
+	.get_property = s2mu005_fg_get_property,
+	.set_property = s2mu005_fg_set_property,
+};
+
 static int s2mu005_fuelgauge_probe(struct i2c_client *client,
 				const struct i2c_device_id *id)
 {
 	struct i2c_adapter *adapter = to_i2c_adapter(client->dev.parent);
 	struct s2mu005_fuelgauge_data *fuelgauge;
 	union power_supply_propval raw_soc_val;
-	//struct power_supply_config fuelgauge_cfg = {};
+	struct power_supply_config fuelgauge_cfg = {};
 	int ret = 0;
 	u8 temp = 0;
 
@@ -2229,15 +2240,18 @@ static int s2mu005_fuelgauge_probe(struct i2c_client *client,
 	if (fuelgauge->pdata->fuelgauge_name == NULL)
 		fuelgauge->pdata->fuelgauge_name = "s2mu005-fuelgauge";
 
-	//fuelgauge_cfg.drv_data = fuelgauge;
-	fuelgauge->psy_fg.name          = "s2mu005-fuelgauge";
-	fuelgauge->psy_fg.type          = SEC_BATTERY_CABLE_UNKNOWN;
-	fuelgauge->psy_fg.get_property  = s2mu005_fg_get_property;
-	fuelgauge->psy_fg.set_property  = s2mu005_fg_set_property;
-	fuelgauge->psy_fg.properties    = s2mu005_fuelgauge_props;
-	fuelgauge->psy_fg.num_properties = ARRAY_SIZE(s2mu005_fuelgauge_props);
-	
-	if (!fuelgauge->info.data_ver) {
+	fuelgauge_cfg.drv_data = fuelgauge;
+
+	fuelgauge->psy_fg =
+	    power_supply_register(&client->dev,
+				  &s2mu005_fuelgauge_power_supply_desc,
+				  &fuelgauge_cfg);
+	if (!fuelgauge->psy_fg) {
+		pr_err("%s: Failed to Register psy_fg\n", __func__);
+		goto err_data_free;
+	}
+
+		if (!fuelgauge->info.data_ver) {
 		s2mu005_read_reg_byte(fuelgauge->i2c, 0x48, &temp);
 		fuelgauge->info.data_ver = (temp & 0x0E) >> 1;
 	}
@@ -2261,13 +2275,13 @@ static int s2mu005_fuelgauge_probe(struct i2c_client *client,
 		s2mu005_fg_calculate_dynamic_scale(fuelgauge, 100);
 
 	s2mu005_init_regs(fuelgauge);
-	
+/*	
 	ret = power_supply_register(&client->dev, &fuelgauge->psy_fg);
 	if (ret) {
 		pr_err("%s: Failed to Register psy_fg\n", __func__);
 		goto err_data_free;
 	}
-
+*/
 	fuelgauge->is_fuel_alerted = false;
 	if (fuelgauge->pdata->fuel_alert_soc >= 0) {
 		s2mu005_fuelgauge_fuelalert_init(fuelgauge->i2c,
@@ -2317,7 +2331,7 @@ static int s2mu005_fuelgauge_probe(struct i2c_client *client,
 	return 0;
 
 err_supply_unreg:
-	power_supply_unregister(&fuelgauge->psy_fg);
+	power_supply_unregister(fuelgauge->psy_fg);
 err_data_free:
 	if (client->dev.of_node)
 		kfree(fuelgauge->pdata);
@@ -2411,7 +2425,7 @@ static int s2mu005_fuelgauge_resume(struct device *dev)
 			if (loop_count++ >= 5) loop_count = 0;
 
 			for (j = 0; j < 5; j++) {
-				pr_info("%s: abs avergae current : %ld\n", __func__, abs(avg_current[j]));
+				pr_info("%s: abs average current : %d\n", __func__, abs(avg_current[j]));
 				if (abs(avg_current[j]) > 30)
 					break;
 			}
