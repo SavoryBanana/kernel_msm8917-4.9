@@ -41,6 +41,17 @@ enum {
 	POWER_SUPPLY_STATUS_FULL,
 };
 
+/* HS60 add for SR-ZQL1695-01000000467 Provide sysFS node named /sys/class/power_supply/battery/charge_type by gaochao at 2019/08/08 start */
+#if !defined(HQ_FACTORY_BUILD)	//ss version
+enum {
+	POWER_SUPPLY_CHARGE_TYPE_UNKNOWN = 0,
+	POWER_SUPPLY_CHARGE_TYPE_NONE,
+	POWER_SUPPLY_CHARGE_TYPE_TRICKLE,
+	POWER_SUPPLY_CHARGE_TYPE_FAST,
+	POWER_SUPPLY_CHARGE_TYPE_TAPER,
+	POWER_SUPPLY_CHARGE_TYPE_SLOW,
+};
+#else
 enum {
 	POWER_SUPPLY_CHARGE_TYPE_UNKNOWN = 0,
 	POWER_SUPPLY_CHARGE_TYPE_NONE,
@@ -48,6 +59,8 @@ enum {
 	POWER_SUPPLY_CHARGE_TYPE_FAST,
 	POWER_SUPPLY_CHARGE_TYPE_TAPER,
 };
+#endif
+/* HS60 add for SR-ZQL1695-01000000467 Provide sysFS node named /sys/class/power_supply/battery/charge_type by gaochao at 2019/08/08 end */
 
 enum {
 	POWER_SUPPLY_HEALTH_UNKNOWN = 0,
@@ -145,6 +158,41 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_STATUS = 0,
 	POWER_SUPPLY_PROP_CHARGE_TYPE,
 	POWER_SUPPLY_PROP_HEALTH,
+	/* HS60 add for SR-ZQL1695-01000000455 Provide sysFS node named /sys/class/power_supply/battery/batt_current_event by gaochao at 2019/08/08 start */
+	#if !defined(HQ_FACTORY_BUILD)	//ss version
+	POWER_SUPPLY_PROP_BATT_CURRENT_EVENT,
+	#endif
+	/* HS60 add for SR-ZQL1695-01000000455 Provide sysFS node named /sys/class/power_supply/battery/batt_current_event by gaochao at 2019/08/08 end */
+	/* HS60 add for SR-ZQL1695-01000000460 Provide sysFS node named /sys/class/power_supply/battery/batt_misc_event by gaochao at 2019/08/11 start */
+	#if !defined(HQ_FACTORY_BUILD)	//ss version
+	POWER_SUPPLY_PROP_BATT_MISC_EVENT,
+	#endif
+	/* HS60 add for SR-ZQL1695-01000000460 Provide sysFS node named /sys/class/power_supply/battery/batt_misc_event by gaochao at 2019/08/11 end */
+	/* HS60 add for SR-ZQL1695-01-315 Provide sysFS node named /sys/class/power_supply/battery/store_mode for retail APP by gaochao at 2019/08/18 start */
+	#if !defined(HQ_FACTORY_BUILD)	//ss version
+	POWER_SUPPLY_PROP_STORE_MODE,
+	#endif
+	/* HS60 add for SR-ZQL1695-01-315 Provide sysFS node named /sys/class/power_supply/battery/store_mode for retail APP by gaochao at 2019/08/18 end */
+	/* HS60 add for SR-ZQL1695-01-358 Provide sysFS node named xxx/battery/batt_slate_mode by gaochao at 2019/08/29 start */
+	#if !defined(HQ_FACTORY_BUILD)	//ss version
+	POWER_SUPPLY_PROP_BATT_SLATE_MODE,
+	#endif
+	/* HS60 add for SR-ZQL1695-01-358 Provide sysFS node named xxx/battery/batt_slate_mode by gaochao at 2019/08/29 end */
+	/* HS60 add for SR-ZQL1695-01-405 by wangzikang at 2019/09/19 start */
+	#if !defined(HQ_FACTORY_BUILD)	//ss version
+	POWER_SUPPLY_PROP_BATT_CURRENT_UA_NOW,
+	POWER_SUPPLY_PROP_BATTERY_CYCLE,
+	#endif
+	/* HS60 add for SR-ZQL1695-01-405 by wangzikang at 2019/09/19 end */
+	/*HS70 add for HS70-919 enable AFC function by qianyingdong at 2019/11/18 start*/
+	#if !defined(HQ_FACTORY_BUILD)	//ss version
+	#if defined(CONFIG_AFC)
+	POWER_SUPPLY_PROP_HV_CHARGER_STATUS,
+	POWER_SUPPLY_PROP_AFC_RESULT,
+	POWER_SUPPLY_PROP_HV_DISABLE,
+	#endif
+	#endif
+	/*HS70 add for HS70-919 enable AFC function by qianyingdong at 2019/11/18 end*/
 	POWER_SUPPLY_PROP_PRESENT,
 	POWER_SUPPLY_PROP_ONLINE,
 	POWER_SUPPLY_PROP_AUTHENTIC,
@@ -322,6 +370,19 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_SERIAL_NUMBER,
 	POWER_SUPPLY_PROP_BATTERY_TYPE,
 	POWER_SUPPLY_PROP_CYCLE_COUNTS,
+#if defined(CONFIG_BATTERY_SAMSUNG_V2)
+	POWER_SUPPLY_PROP_ALLOW_DETECTION,
+	POWER_SUPPLY_PROP_CHARGE_ENABLED,
+	POWER_SUPPLY_PROP_MULTI_CHARGER_MODE,
+	POWER_SUPPLY_PROP_READ_SLAVE_REG,
+	POWER_SUPPLY_PROP_AFC_CHARGER_MODE,
+	/* Properties of type `const char *' */
+	POWER_SUPPLY_PROP_USB_CONFIGURE,
+
+	POWER_SUPPLY_PROP_FILTER_CFG,
+	POWER_SUPPLY_PROP_MAX,
+	POWER_SUPPLY_EXT_PROP_MAX = POWER_SUPPLY_PROP_MAX + 256,
+#endif	
 };
 
 enum power_supply_type {
@@ -345,6 +406,12 @@ enum power_supply_type {
 	POWER_SUPPLY_TYPE_TYPEC,	/* Type-C */
 	POWER_SUPPLY_TYPE_UFP,		/* Type-C UFP */
 	POWER_SUPPLY_TYPE_DFP,		/* TYpe-C DFP */
+#if defined(CONFIG_BATTERY_SAMSUNG_V2)
+	POWER_SUPPLY_TYPE_POWER_SHARING,/* power sharing cable(19) */
+	POWER_SUPPLY_TYPE_OTG,			/* OTG (20) */
+	POWER_SUPPLY_TYPE_POGO,			/* POGO (21) */
+	POWER_SUPPLY_TYPE_MAX,
+#endif
 };
 
 /* Indicates USB Type-C CC connection status */
