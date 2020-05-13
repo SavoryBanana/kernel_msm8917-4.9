@@ -3,7 +3,6 @@
 //#define pr_fmt(fmt)	"[MUIC] " fmt
 
 #include <linux/notifier.h>
-#include <linux/switch.h>
 #include <linux/muic/muic.h>
 #include <linux/muic/muic_notifier.h>
 #include <linux/sec_class.h>
