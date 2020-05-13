@@ -1515,7 +1515,7 @@ static bool sec_bat_ovp_uvlo_result(
 			wake_lock_timeout(&battery->vbus_wake_lock, HZ * 10);
 			break;
 		}
-		power_supply_changed(&battery->psy_bat);
+		power_supply_changed(battery->psy_bat);
 		return true;
 	}
 
@@ -3501,7 +3501,7 @@ static void sec_bat_monitor_work(
 #if defined(CONFIG_BATTERY_CISD)
 					sec_bat_cisd_check(battery);
 #endif
-					power_supply_changed(&battery->psy_bat);
+					power_supply_changed(battery->psy_bat);
 					pr_info("Skip monitor work(%ld, Vnow:%d(mV), SoC:%d(%%), Tbat:%d(0.1'C))\n",
 						c_ts.tv_sec - old_ts.tv_sec, battery->voltage_now, battery->capacity, battery->temperature);
 
@@ -3640,7 +3640,7 @@ skip_current_monitor:
 			sec_bat_set_charge(battery, SEC_BATTERY_CHARGING_1ST);
 		}
 	}
-	power_supply_changed(&battery->psy_bat);
+	power_supply_changed(battery->psy_bat);
 
 skip_monitor:
 	sec_bat_set_polling(battery);
@@ -3835,7 +3835,7 @@ static void sec_bat_cable_work(struct work_struct *work)
 		POWER_SUPPLY_PROP_ONLINE, val);
 	
 	if (is_wireless_type(battery->cable_type)) {
-		power_supply_changed(&battery->psy_bat);
+		power_supply_changed(battery->psy_bat);
 		/* After 10sec wireless charging, Vrect headroom has to be reduced */
 		wake_lock(&battery->wc_headroom_wake_lock);
 		queue_delayed_work(battery->monitor_wqueue, &battery->wc_headroom_work,
@@ -4041,8 +4041,7 @@ ssize_t sec_bat_show_attrs(struct device *dev,
 				  struct device_attribute *attr, char *buf)
 {
 	struct power_supply *psy = dev_get_drvdata(dev);
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_bat);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 	const ptrdiff_t offset = attr - sec_battery_attrs;
 	union power_supply_propval value = {0, };
 	int i = 0;
@@ -4323,8 +4322,8 @@ ssize_t sec_bat_show_attrs(struct device *dev,
 				pr_err("%s: Fail to get psy (%s)\n",
 						__func__, battery->pdata->fuelgauge_name);
 			} else {
-				if (psy_fg->get_property != NULL) {
-					ret = psy_fg->get_property(psy_fg,
+				if (psy_fg->desc->get_property != NULL) {
+					ret = psy_fg->desc->get_property(psy_fg,
 							POWER_SUPPLY_PROP_ENERGY_FULL, &value);
 					if (ret < 0) {
 						pr_err("%s: Fail to %s get (%d=>%d)\n",
@@ -5032,12 +5031,13 @@ void update_external_temp_table(struct sec_battery_info *battery, int temp[])
 	battery->pdata->temp_low_recovery_lpm = temp[7];
 }
 
-ssize_t sec_bat_store_attrs(struct device *dev,
-				struct device_attribute *attr, const char *buf, size_t count)
+ssize_t sec_bat_store_attrs(
+					struct device *dev,
+					struct device_attribute *attr,
+					const char *buf, size_t count)
 {
 	struct power_supply *psy = dev_get_drvdata(dev);
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_bat);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 	const ptrdiff_t offset = attr - sec_battery_attrs;
 	int ret = -EINVAL;
 	int x = 0;
@@ -5966,8 +5966,10 @@ ssize_t sec_bat_store_attrs(struct device *dev,
 		if (sscanf(buf, "%10d\n", &x) == 1) {
 			pr_info("%s: PMS sevice hiccup read done : %d ", __func__, x);
 			if (!battery->hiccup_status &&
-				(battery->misc_event & BATT_MISC_EVENT_HICCUP_TYPE))
-				sec_bat_set_misc_event(battery,	BATT_MISC_EVENT_HICCUP_TYPE, 1);
+				(battery->misc_event & BATT_MISC_EVENT_HICCUP_TYPE)) {
+				sec_bat_set_misc_event(battery,
+					BATT_MISC_EVENT_HICCUP_TYPE, 1);
+			}
 		}
 		ret = count;
 		break;
@@ -6386,8 +6388,7 @@ static int sec_bat_set_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				const union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_bat);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 	int current_cable_type = SEC_BATTERY_CABLE_NONE;
 	int full_check_type = SEC_BATTERY_FULLCHARGED_NONE;
 	union power_supply_propval value = {0, };
@@ -6467,7 +6468,7 @@ static int sec_bat_set_property(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_CAPACITY:
 		battery->capacity = val->intval;
-		power_supply_changed(&battery->psy_bat);
+		power_supply_changed(battery->psy_bat);
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_NOW:
 		/* If JIG is attached, the voltage is set as 1079 */
@@ -6475,7 +6476,7 @@ static int sec_bat_set_property(struct power_supply *psy,
 		if(val->intval == 1079)	{
 			battery->voltage_now = 1079;
 			battery->voltage_avg = 1079;
-			power_supply_changed(&battery->psy_bat);
+			power_supply_changed(battery->psy_bat);
 		}
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_TYPE:
@@ -6630,8 +6631,7 @@ static int sec_bat_get_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_bat);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 #ifdef CONFIG_SEC_FACTORY
 	union power_supply_propval value = {0, };
 #endif
@@ -6839,8 +6839,7 @@ static int sec_usb_get_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_usb);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	if (psp != POWER_SUPPLY_PROP_ONLINE)
 		return -EINVAL;
@@ -6873,8 +6872,7 @@ static int sec_ac_get_property(struct power_supply *psy,
 			       enum power_supply_property psp,
 			       union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_ac);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -6932,8 +6930,7 @@ static int sec_wireless_get_property(struct power_supply *psy,
 			       enum power_supply_property psp,
 			       union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_wireless);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -6955,8 +6952,7 @@ static int sec_wireless_set_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				const union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_wireless);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -7032,8 +7028,7 @@ static int sec_ps_set_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				const union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_ps);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 	union power_supply_propval value;
 
 	switch (psp) {
@@ -7080,8 +7075,7 @@ static int sec_ps_get_property(struct power_supply *psy,
 			       enum power_supply_property psp,
 			       union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_ps);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_STATUS:
@@ -7101,8 +7095,7 @@ static int sec_pogo_get_property(struct power_supply *psy,
 			       enum power_supply_property psp,
 			       union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_pogo);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -7120,8 +7113,7 @@ static int sec_pogo_set_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				const union power_supply_propval *val)
 {
-	struct sec_battery_info *battery =
-		container_of(psy, struct sec_battery_info, psy_pogo);
+	struct sec_battery_info *battery = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -9432,10 +9424,65 @@ static void sec_bat_init_chg_work(struct work_struct *work)
 	}
 }
 
+
+static const struct power_supply_desc battery_power_supply_desc = {
+	.name = "battery",
+	.type = POWER_SUPPLY_TYPE_BATTERY,
+	.properties = sec_battery_props,
+	.num_properties = ARRAY_SIZE(sec_battery_props),
+	.get_property = sec_bat_get_property,
+	.set_property = sec_bat_set_property,
+};
+
+static const struct power_supply_desc usb_power_supply_desc = {
+	.name = "usb",
+	.type = POWER_SUPPLY_TYPE_USB,
+	.properties = sec_power_props,
+	.num_properties = ARRAY_SIZE(sec_power_props),
+	.get_property = sec_usb_get_property,
+};
+
+static const struct power_supply_desc ac_power_supply_desc = {
+	.name = "ac",
+	.type = POWER_SUPPLY_TYPE_MAINS,
+	.properties = sec_ac_props,
+	.num_properties = ARRAY_SIZE(sec_ac_props),
+	.get_property = sec_ac_get_property,
+};
+
+static const struct power_supply_desc wireless_power_supply_desc = {
+	.name = "wireless",
+	.type = POWER_SUPPLY_TYPE_WIRELESS,
+	.properties = sec_wireless_props,
+	.num_properties = ARRAY_SIZE(sec_wireless_props),
+	.get_property = sec_wireless_get_property,
+	.set_property = sec_wireless_set_property,
+};
+
+static const struct power_supply_desc ps_power_supply_desc = {
+	.name = "ps",
+	.type = POWER_SUPPLY_TYPE_POWER_SHARING,
+	.properties = sec_ps_props,
+	.num_properties = ARRAY_SIZE(sec_ps_props),
+	.get_property = sec_ps_get_property,
+	.set_property = sec_ps_set_property,
+};
+
+static const struct power_supply_desc pogo_power_supply_desc = {
+	.name = "pogo",
+	.type = POWER_SUPPLY_TYPE_POGO,
+	.properties = sec_pogo_props,
+	.num_properties = ARRAY_SIZE(sec_pogo_props),
+	.get_property = sec_pogo_get_property,
+	.set_property = sec_pogo_set_property,
+};
+
 static int sec_battery_probe(struct platform_device *pdev)
 {
 	sec_battery_platform_data_t *pdata = NULL;
 	struct sec_battery_info *battery;
+	struct power_supply_config battery_cfg = {};
+
 	int ret = 0;
 #ifndef CONFIG_OF
 	int i = 0;
@@ -9674,51 +9721,6 @@ static int sec_battery_probe(struct platform_device *pdev)
 	if (battery->pdata->fuelgauge_name == NULL)
 		battery->pdata->fuelgauge_name = "sec-fuelgauge";
 
-	battery->psy_bat.name = "battery";
-	battery->psy_bat.type = POWER_SUPPLY_TYPE_BATTERY;
-	battery->psy_bat.properties = sec_battery_props;
-	battery->psy_bat.num_properties = ARRAY_SIZE(sec_battery_props);
-	battery->psy_bat.get_property = sec_bat_get_property;
-	battery->psy_bat.set_property = sec_bat_set_property;
-	battery->psy_usb.name = "usb";
-	battery->psy_usb.type = POWER_SUPPLY_TYPE_USB;
-	battery->psy_usb.supplied_to = supply_list;
-	battery->psy_usb.num_supplicants = ARRAY_SIZE(supply_list);
-	battery->psy_usb.properties = sec_power_props;
-	battery->psy_usb.num_properties = ARRAY_SIZE(sec_power_props);
-	battery->psy_usb.get_property = sec_usb_get_property;
-	battery->psy_ac.name = "ac";
-	battery->psy_ac.type = POWER_SUPPLY_TYPE_MAINS;
-	battery->psy_ac.supplied_to = supply_list;
-	battery->psy_ac.num_supplicants = ARRAY_SIZE(supply_list);
-	battery->psy_ac.properties = sec_ac_props;
-	battery->psy_ac.num_properties = ARRAY_SIZE(sec_ac_props);
-	battery->psy_ac.get_property = sec_ac_get_property;
-	battery->psy_wireless.name = "wireless";
-	battery->psy_wireless.type = POWER_SUPPLY_TYPE_WIRELESS;
-	battery->psy_wireless.supplied_to = supply_list;
-	battery->psy_wireless.num_supplicants = ARRAY_SIZE(supply_list);
-	battery->psy_wireless.properties = sec_wireless_props;
-	battery->psy_wireless.num_properties = ARRAY_SIZE(sec_wireless_props);
-	battery->psy_wireless.get_property = sec_wireless_get_property;
-	battery->psy_wireless.set_property = sec_wireless_set_property;
-	battery->psy_ps.name = "ps";
-	battery->psy_ps.type = POWER_SUPPLY_TYPE_POWER_SHARING;
-	battery->psy_ps.supplied_to = supply_list;
-	battery->psy_ps.num_supplicants = ARRAY_SIZE(supply_list);
-	battery->psy_ps.properties = sec_ps_props;
-	battery->psy_ps.num_properties = ARRAY_SIZE(sec_ps_props);
-	battery->psy_ps.get_property = sec_ps_get_property;
-	battery->psy_ps.set_property = sec_ps_set_property;
-	battery->psy_pogo.name = "pogo";
-	battery->psy_pogo.type = POWER_SUPPLY_TYPE_POGO;
-	battery->psy_pogo.supplied_to = supply_list;
-	battery->psy_pogo.num_supplicants = ARRAY_SIZE(supply_list);
-	battery->psy_pogo.properties = sec_pogo_props;
-	battery->psy_pogo.num_properties = ARRAY_SIZE(sec_pogo_props);
-	battery->psy_pogo.get_property = sec_pogo_get_property;
-	battery->psy_pogo.set_property = sec_pogo_set_property;
-
 #if !defined(CONFIG_ENG_BATTERY_CONCEPT) && !defined(CONFIG_SEC_FACTORY)
 	battery->block_water_event = !(get_switch_sel() & SWITCH_SEL_RUSTPROOF_MASK) ? 0 : 1;
 	pr_info("%s: init block_water_event = %d\n", __func__, battery->block_water_event);
@@ -9775,50 +9777,61 @@ static int sec_battery_probe(struct platform_device *pdev)
 	sec_battery_cisd_init(battery);
 #endif
 
+	battery_cfg.drv_data = battery;
+
 	/* init power supplier framework */
-	ret = power_supply_register(&pdev->dev, &battery->psy_pogo);
-	if (ret) {
+	if (!battery->psy_pogo) {
 		dev_err(battery->dev,
 			"%s: Failed to Register psy_pogo\n", __func__);
 		goto err_workqueue;
 	}
+	battery->psy_pogo->supplied_to = supply_list;
+	battery->psy_pogo->num_supplicants = ARRAY_SIZE(supply_list);
 
-	ret = power_supply_register(&pdev->dev, &battery->psy_ps);
-	if (ret) {
+	battery->psy_ps = power_supply_register(&pdev->dev, &ps_power_supply_desc, &battery_cfg);
+	if (!battery->psy_ps) {
 		dev_err(battery->dev,
 			"%s: Failed to Register psy_ps\n", __func__);
 		goto err_supply_unreg_pogo;
 	}
+	battery->psy_ps->supplied_to = supply_list;
+	battery->psy_ps->num_supplicants = ARRAY_SIZE(supply_list);
 
-	ret = power_supply_register(&pdev->dev, &battery->psy_wireless);
-	if (ret) {
+	battery->psy_wireless = power_supply_register(&pdev->dev, &wireless_power_supply_desc, &battery_cfg);
+	if (!battery->psy_wireless) {
 		dev_err(battery->dev,
 			"%s: Failed to Register psy_wireless\n", __func__);
 		goto err_supply_unreg_ps;
 	}
+	battery->psy_wireless->supplied_to = supply_list;
+	battery->psy_wireless->num_supplicants = ARRAY_SIZE(supply_list);
 
-	ret = power_supply_register(&pdev->dev, &battery->psy_usb);
-	if (ret) {
+	battery->psy_usb = power_supply_register(&pdev->dev, &usb_power_supply_desc, &battery_cfg);
+	if (!battery->psy_usb) {
 		dev_err(battery->dev,
 			"%s: Failed to Register psy_usb\n", __func__);
 		goto err_supply_unreg_wireless;
 	}
+	battery->psy_usb->supplied_to = supply_list;
+	battery->psy_usb->num_supplicants = ARRAY_SIZE(supply_list);
 
-	ret = power_supply_register(&pdev->dev, &battery->psy_ac);
-	if (ret) {
+	battery->psy_ac = power_supply_register(&pdev->dev, &ac_power_supply_desc, &battery_cfg);
+	if (!battery->psy_ac) {
 		dev_err(battery->dev,
 			"%s: Failed to Register psy_ac\n", __func__);
 		goto err_supply_unreg_usb;
 	}
+	battery->psy_ac->supplied_to = supply_list;
+	battery->psy_ac->num_supplicants = ARRAY_SIZE(supply_list);
 
-	ret = power_supply_register(&pdev->dev, &battery->psy_bat);
-	if (ret) {
+	battery->psy_bat = power_supply_register(&pdev->dev, &battery_power_supply_desc, &battery_cfg);
+	if (!battery->psy_bat) {
 		dev_err(battery->dev,
 			"%s: Failed to Register psy_bat\n", __func__);
 		goto err_supply_unreg_ac;
 	}
 
-	ret = sec_bat_create_attrs(battery->psy_bat.dev);
+	ret = sec_bat_create_attrs(&battery->psy_bat->dev);
 	if (ret) {
 		dev_err(battery->dev,
 			"%s : Failed to create_attrs\n", __func__);
@@ -9897,17 +9910,17 @@ static int sec_battery_probe(struct platform_device *pdev)
 	return 0;
 
 err_req_irq:
-	power_supply_unregister(&battery->psy_bat);
+	power_supply_unregister(battery->psy_bat);
 err_supply_unreg_ac:
-	power_supply_unregister(&battery->psy_ac);
+	power_supply_unregister(battery->psy_ac);
 err_supply_unreg_usb:
-	power_supply_unregister(&battery->psy_usb);
+	power_supply_unregister(battery->psy_usb);
 err_supply_unreg_wireless:
-	power_supply_unregister(&battery->psy_wireless);
+	power_supply_unregister(battery->psy_wireless);
 err_supply_unreg_ps:
-	power_supply_unregister(&battery->psy_ps);
+	power_supply_unregister(battery->psy_ps);
 err_supply_unreg_pogo:
-	power_supply_unregister(&battery->psy_pogo);
+	power_supply_unregister(battery->psy_pogo);
 err_workqueue:
 	destroy_workqueue(battery->monitor_wqueue);
 err_irq:
@@ -9983,14 +9996,15 @@ static int sec_battery_remove(struct platform_device *pdev)
 	for (i = 0; i < SEC_BAT_ADC_CHANNEL_NUM; i++)
 		adc_exit(battery->pdata, i);
 #endif
-	power_supply_unregister(&battery->psy_ps);
-	power_supply_unregister(&battery->psy_wireless);
-	power_supply_unregister(&battery->psy_ac);
-	power_supply_unregister(&battery->psy_usb);
-	power_supply_unregister(&battery->psy_bat);
+	power_supply_unregister(battery->psy_ps);
+	power_supply_unregister(battery->psy_wireless);
+	power_supply_unregister(battery->psy_ac);
+	power_supply_unregister(battery->psy_usb);
+	power_supply_unregister(battery->psy_bat);
 
-	dev_dbg(battery->dev, "%s: End\n", __func__);
 	kfree(battery);
+
+	pr_info("%s: --\n", __func__);
 
 	return 0;
 }

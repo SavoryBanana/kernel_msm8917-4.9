@@ -1047,14 +1047,16 @@ static inline struct power_supply *get_power_supply_by_name(char *name)
 			__func__, (name));	\
 		value.intval = 0;	\
 	} else {	\
-		if (psy->function##_property != NULL) { \
-			ret = psy->function##_property(psy, (property), &(value)); \
+		if (psy->desc->function##_property != NULL) { \
+			ret = psy->desc->function##_property(psy, \
+				(enum power_supply_property)(property), &(value)); \
 			if (ret < 0) {	\
 				pr_err("%s: Fail to %s "#function" (%d=>%d)\n", \
 						__func__, name, (property), ret);	\
 				value.intval = 0;	\
 			}	\
 		}	\
+		power_supply_put(psy);	\
 	}	\
 }
 
