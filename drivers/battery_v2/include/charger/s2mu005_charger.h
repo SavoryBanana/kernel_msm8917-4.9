@@ -250,8 +250,8 @@ struct s2mu005_charger_data {
 	struct delayed_work	charger_work;
 	struct delayed_work	det_bat_work;
 	struct workqueue_struct *charger_wqueue;
-	struct power_supply	psy_chg;
-	struct power_supply	psy_otg;
+	struct power_supply	*psy_chg;
+	struct power_supply	*psy_otg;
 	s2mu005_charger_platform_data_t *pdata;
 	int dev_id;
 	int input_current;

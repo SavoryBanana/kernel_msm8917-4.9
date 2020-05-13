@@ -38,6 +38,10 @@
 
 #define IVR_WORK_DELAY 0
 
+static char *s2mu005_supplied_to[] = {
+	"s2mu005-charger",
+};
+
 extern int factory_mode;
 
 static enum power_supply_property s2mu005_charger_props[] = {
@@ -110,7 +114,7 @@ static int s2m_acok_notifier_call(
 				unsigned long event, void *v)
 {
 	struct power_supply *psy = get_power_supply_by_name("s2mu005-charger");
-	struct s2mu005_charger_data *charger = container_of(psy, struct s2mu005_charger_data, psy_chg);
+	struct s2mu005_charger_data *charger = power_supply_get_drvdata(psy);
 
 	pr_info("s2m acok noti!!\n");
 	/* Delay 100ms for debounce */
@@ -227,7 +231,7 @@ static void s2mu005_charger_otg_control(struct s2mu005_charger_data *charger,
 #if EN_TEST_READ
 	s2mu005_test_read(charger->client);
 #endif
-	power_supply_changed(&charger->psy_otg);
+	power_supply_changed(charger->psy_otg);
 }
 
 #if EN_IVR_IRQ
@@ -911,7 +915,7 @@ static int s2mu005_chg_get_property(struct power_supply *psy,
 		enum power_supply_property psp,
 		union power_supply_propval *val)
 {
-	struct s2mu005_charger_data *charger = container_of(psy, struct s2mu005_charger_data, psy_chg);
+	struct s2mu005_charger_data *charger = power_supply_get_drvdata(psy);
 	int chg_curr, aicr;
 
 	switch (psp) {
@@ -982,7 +986,7 @@ static int s2mu005_chg_set_property(struct power_supply *psy,
 		enum power_supply_property psp,
 		const union power_supply_propval *val)
 {
-	struct s2mu005_charger_data *charger = container_of(psy, struct s2mu005_charger_data, psy_chg);
+	struct s2mu005_charger_data *charger = power_supply_get_drvdata(psy);
 	enum power_supply_ext_property ext_psp = psp;
 	int buck_state = ENABLE;
 	union power_supply_propval value;
@@ -1323,7 +1327,7 @@ static int s2mu005_otg_set_property(struct power_supply *psy,
 				enum power_supply_property psp,
 				const union power_supply_propval *val)
 {
-	struct s2mu005_charger_data *charger = container_of(psy, struct s2mu005_charger_data, psy_otg);
+	struct s2mu005_charger_data *charger = power_supply_get_drvdata(psy);
 	union power_supply_propval value;
 
 	switch (psp) {
@@ -1332,7 +1336,7 @@ static int s2mu005_otg_set_property(struct power_supply *psy,
 		pr_info("%s: OTG %s\n", __func__, value.intval > 0 ? "on" : "off");
 		psy_do_property(charger->pdata->charger_name, set,
 				POWER_SUPPLY_PROP_CHARGE_OTG_CONTROL, value);
-		power_supply_changed(&charger->psy_otg);
+		power_supply_changed(charger->psy_otg);
 		break;
 	default:
 		return -EINVAL;
@@ -1625,12 +1629,30 @@ static struct of_device_id s2mu005_charger_match_table[] = {
 	{},
 };
 
+static const struct power_supply_desc s2mu005_charger_power_supply_desc = {
+	.name           = "s2mu005-charger",
+	.type           = SEC_BATTERY_CABLE_UNKNOWN,
+	.get_property   = s2mu005_chg_get_property,
+	.set_property   = s2mu005_chg_set_property,
+	.properties     = s2mu005_charger_props,
+	.num_properties = ARRAY_SIZE(s2mu005_charger_props),
+};
+
+static const struct power_supply_desc otg_power_supply_desc = {
+	.name			= "otg",
+	.type			= SEC_BATTERY_CABLE_OTG,
+	.get_property	= s2mu005_otg_get_property,
+	.set_property	= s2mu005_otg_set_property,
+	.properties		= s2mu005_otg_props,
+	.num_properties	= ARRAY_SIZE(s2mu005_otg_props),
+};
+
 static int s2mu005_charger_probe(struct platform_device *pdev)
 {
 	struct s2mu005_dev *s2mu005 = dev_get_drvdata(pdev->dev.parent);
 	struct s2mu005_platform_data *pdata = dev_get_platdata(s2mu005->dev);
 	struct s2mu005_charger_data *charger;
-	/* struct power_supply_config charger_cfg = {}; */
+	struct power_supply_config psy_cfg = {};
 	int ret = 0;
 
 	union power_supply_propval val;
@@ -1664,33 +1686,26 @@ static int s2mu005_charger_probe(struct platform_device *pdev)
 
 	if (charger->pdata->charger_name == NULL)
 		charger->pdata->charger_name = "s2mu005-charger";
-		
-	charger->psy_chg.name           = "s2mu005-charger";
-	charger->psy_chg.type           = SEC_BATTERY_CABLE_UNKNOWN;
-	charger->psy_chg.get_property   = s2mu005_chg_get_property;
-	charger->psy_chg.set_property   = s2mu005_chg_set_property;
-	charger->psy_chg.properties     = s2mu005_charger_props;
-	charger->psy_chg.num_properties = ARRAY_SIZE(s2mu005_charger_props);
-	charger->psy_otg.name		= "otg";
-	charger->psy_otg.type		= SEC_BATTERY_CABLE_OTG;
-	charger->psy_otg.get_property	= s2mu005_otg_get_property;
-	charger->psy_otg.set_property	= s2mu005_otg_set_property;
-	charger->psy_otg.properties	= s2mu005_otg_props;
-	charger->psy_otg.num_properties	= ARRAY_SIZE(s2mu005_otg_props);
 
 	s2mu005_chg_init(charger);
 
-	/* charger_cfg.drv_data = charger; */
 
-	ret = power_supply_register(&pdev->dev, &charger->psy_chg);
-	if (ret) {
+	psy_cfg.drv_data = charger;
+	psy_cfg.supplied_to = s2mu005_supplied_to;
+	psy_cfg.num_supplicants = ARRAY_SIZE(s2mu005_supplied_to),
+
+	charger->psy_chg = power_supply_register(&pdev->dev, &s2mu005_charger_power_supply_desc, &psy_cfg);
+	if (!charger->psy_chg) {
+		dev_err(&pdev->dev, "%s: failed to power supply charger register", __func__);
 		goto err_power_supply_register;
 	}
 
-	ret = power_supply_register(&pdev->dev, &charger->psy_otg);
-	if (ret) {
+	charger->psy_otg = power_supply_register(&pdev->dev, &otg_power_supply_desc, &psy_cfg);
+	if (!charger->psy_otg) {
+		dev_err(&pdev->dev, "%s: failed to power supply otg register ", __func__);
 		goto err_power_supply_register_otg;
 	}
+
 
 	charger->charger_wqueue = create_singlethread_workqueue("charger-wq");
 	if (!charger->charger_wqueue) {
@@ -1753,10 +1768,10 @@ static int s2mu005_charger_probe(struct platform_device *pdev)
 
 err_reg_irq:
 	destroy_workqueue(charger->charger_wqueue);
-	power_supply_unregister(&charger->psy_otg);
+	power_supply_unregister(charger->psy_otg);
 err_create_wq:
 err_power_supply_register_otg:
-	power_supply_unregister(&charger->psy_chg);
+	power_supply_unregister(charger->psy_chg);
 err_power_supply_register:
 err_parse_dt:
 err_parse_dt_nomem:
@@ -1770,7 +1785,7 @@ static int s2mu005_charger_remove(struct platform_device *pdev)
 	struct s2mu005_charger_data *charger =
 		platform_get_drvdata(pdev);
 
-	power_supply_unregister(&charger->psy_chg);
+	power_supply_unregister(charger->psy_chg);
 	s2m_acok_unregister_notifier(&s2m_acok_notifier);
 	mutex_destroy(&charger->charger_mutex);
 	kfree(charger);
