@@ -35,7 +35,7 @@
 #undef CDBG
 #define CDBG(fmt, args...) pr_err(fmt, ##args)
 
-extern struct class *camera_class;
+/* extern struct class *camera_class; */
 struct device *flash_dev;
 bool assistive_light = false;
 struct s2mu005_led_data * g_led_datas[S2MU005_LED_MAX];
@@ -1142,16 +1142,17 @@ int create_flash_sysfs(void)
 {
 	int err = -ENODEV;
 
-	if (IS_ERR_OR_NULL(camera_class)) {
+/*	if (IS_ERR_OR_NULL(camera_class)) {
 		pr_err("flash_sysfs: error, camera class not exist");
 		return -ENODEV;
 	}
-
-	flash_dev = device_create(camera_class, NULL, 0, NULL, "flash");
+*/
+/*	flash_dev = device_create(camera_class, NULL, 0, NULL, "flash");
 	if (IS_ERR(flash_dev)) {
 		pr_err("flash_sysfs: failed to create device(flash)\n");
 		return -ENODEV;
 	}
+*/
 
 	err = device_create_file(flash_dev, &dev_attr_rear_flash);
 	if (unlikely(err < 0)) {
