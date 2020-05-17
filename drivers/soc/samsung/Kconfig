@@ -1,10 +1,14 @@
 #
 # SAMSUNG SoC drivers
 #
-menuconfig SOC_SAMSUNG
-	bool "Samsung SoC driver support" if COMPILE_TEST
-
-if SOC_SAMSUNG
+config DRV_SAMSUNG
+	bool "samsung device dedicated drivers option"
+	default y
+	help
+	  This is driver option for samsung sec_class
+	  Say y here to enable samsung classes for drivers
+	  Provide option of enabling sec class
+	  Supports sec drivers key, touch, sec_debug et
 
 config EXYNOS_PMU
 	bool "Exynos PMU controller driver" if COMPILE_TEST
@@ -13,5 +17,3 @@ config EXYNOS_PMU
 config EXYNOS_PM_DOMAINS
 	bool "Exynos PM domains" if COMPILE_TEST
 	depends on PM_GENERIC_DOMAINS || COMPILE_TEST
-
-endif
