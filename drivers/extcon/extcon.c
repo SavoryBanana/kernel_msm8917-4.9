@@ -224,9 +224,9 @@ struct extcon_cable {
 };
 
 static struct class *extcon_class;
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID) && !defined(CONFIG_ANDROID_SWITCH)
 static struct class_compat *switch_class;
-#endif /* CONFIG_ANDROID */
+#endif /* CONFIG_ANDROID && !defined(CONFIG_ANDROID_SWITCH) */
 
 static LIST_HEAD(extcon_dev_list);
 static DEFINE_MUTEX(extcon_dev_list_lock);
@@ -1011,11 +1011,11 @@ static int create_extcon_class(void)
 			return PTR_ERR(extcon_class);
 		extcon_class->dev_groups = extcon_groups;
 
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID) && !defined(CONFIG_ANDROID_SWITCH)
 		switch_class = class_compat_register("switch");
 		if (WARN(!switch_class, "cannot allocate"))
 			return -ENOMEM;
-#endif /* CONFIG_ANDROID */
+#endif /* CONFIG_ANDROID && !defined(CONFIG_ANDROID_SWITCH) */
 	}
 
 	return 0;
@@ -1237,10 +1237,10 @@ int extcon_dev_register(struct extcon_dev *edev)
 		put_device(&edev->dev);
 		goto err_dev;
 	}
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID) && !defined(CONFIG_ANDROID_SWITCH)
 	if (switch_class)
 		ret = class_compat_create_link(switch_class, &edev->dev, NULL);
-#endif /* CONFIG_ANDROID */
+#endif /* CONFIG_ANDROID && !defined(CONFIG_ANDROID_SWITCH */
 
 	spin_lock_init(&edev->lock);
 
@@ -1333,7 +1333,7 @@ void extcon_dev_unregister(struct extcon_dev *edev)
 		kfree(edev->cables);
 	}
 
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID) && !defined(CONFIG_ANDROID_SWITCH)
 	if (switch_class)
 		class_compat_remove_link(switch_class, &edev->dev, NULL);
 #endif
@@ -1407,7 +1407,7 @@ module_init(extcon_class_init);
 
 static void __exit extcon_class_exit(void)
 {
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID) && !defined(CONFIG_ANDROID_SWITCH)
 	class_compat_unregister(switch_class);
 #endif
 	class_destroy(extcon_class);
