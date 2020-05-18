@@ -14,9 +14,9 @@
 //#include <mach/irqs.h>
 
 /* switch device header */
-#ifdef CONFIG_SWITCH
-#include <linux/switch.h>
-#endif /* CONFIG_SWITCH */
+#ifdef CONFIG_ANDROID_SWITCH
+#include "../staging/android/switch/switch.h"
+#endif /* CONFIG_ANDROID_SWITCH */
 
 #if defined(CONFIG_USE_SAFEOUT)
 #include <linux/regulator/consumer.h>
@@ -32,7 +32,7 @@
 #include <linux/ccic/ccic_notifier.h>
 #endif
 
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 static struct switch_dev switch_dock = {
 	.name = "dock",
 };
@@ -55,7 +55,7 @@ struct switch_dev switch_attached_muic_cable = {
 	.name = "attached_muic_cable",	/* sys/class/switch/attached_muic_cable/state */
 };
 #endif
-#endif /* CONFIG_SWITCH */
+#endif /* CONFIG_ANDROID_SWITCH */
 
 /* 1: 619K is used as a wake-up noti which sends a dock noti.
   * 0: 619K is used 619K itself, JIG_UART_ON
@@ -121,7 +121,7 @@ static struct notifier_block dock_notifier_block;
 static void muic_jig_uart_cb(int jig_state)
 {
 	pr_info("%s: MUIC uart type(%d)\n", __func__, jig_state);
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 	switch_set_state(&switch_uart3, jig_state);
 #endif
 }
@@ -129,7 +129,7 @@ static void muic_jig_uart_cb(int jig_state)
 void muic_send_dock_intent(int type)
 {
 	printk(KERN_DEBUG "[muic] %s: MUIC dock type(%d)\n", __func__, type);
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 	switch_set_state(&switch_dock, type);
 #endif
 }
@@ -138,7 +138,7 @@ void muic_send_dock_intent(int type)
 void muic_send_attached_muic_cable_intent(int type)
 {
 	pr_info("%s: MUIC attached_muic_cable type(%d)\n", __func__, type);
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 	switch_set_state(&switch_attached_muic_cable, type);
 #endif
 }
@@ -148,7 +148,7 @@ void muic_send_attached_muic_cable_intent(int type)
 static int muic_earjack_intent(int state)
 {
 	pr_info("%s: MUIC earjack(%d)\n", __func__, state);
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 	switch_set_state(&switch_earjack, state);
 #endif
 	return NOTIFY_OK;
@@ -156,7 +156,7 @@ static int muic_earjack_intent(int state)
 static int muic_earjackkey_intent(int state)
 {
 	pr_info("%s: MUIC earjackkey(%d)\n", __func__, state);
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 	switch_set_state(&switch_earjackkey, state);
 #endif
 	return NOTIFY_OK;
@@ -400,7 +400,7 @@ err:
 
 static void muic_init_switch_dev_cb(void)
 {
-#ifdef CONFIG_SWITCH
+#ifdef CONFIG_ANDROID_SWITCH
 	int ret;
 
 	/* for DockObserver */
@@ -442,7 +442,7 @@ static void muic_init_switch_dev_cb(void)
 		goto err_switch_earjackkey_register;
 	}
 #endif
-#endif /* CONFIG_SWITCH */
+#endif /* CONFIG_ANDROID_SWITCH */
 
 #if defined(CONFIG_MUIC_NOTIFIER)
 #if defined (CONFIG_MUIC_DOCK_NOTIFIER)
