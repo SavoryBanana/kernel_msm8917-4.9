@@ -216,4 +216,5 @@ source "drivers/tee/Kconfig"
 
 source "drivers/muic/Kconfig"
 
+source "drivers/motor/Kconfig"
 endmenu
