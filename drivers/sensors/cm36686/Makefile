@@ -1,0 +1,1 @@
+obj-$(CONFIG_SENSORS_CM36686)	+= cm36686.o

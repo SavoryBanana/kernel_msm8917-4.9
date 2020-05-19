@@ -1,0 +1,1 @@
+obj-$(CONFIG_SENSORS_STK3328)	+= stk3328.o

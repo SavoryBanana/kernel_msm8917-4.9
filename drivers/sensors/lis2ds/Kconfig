@@ -1,0 +1,17 @@
+config SENSORS_LIS2DS
+	tristate "STMicroelectronics LIS2DS/LIS2DS12 sensors"
+	depends on (I2C || SPI) && SYSFS
+	help
+	   This driver support the STMicroelectronics LIS2DS/LIS2DS12 sensors.
+	   It is a accelerometer device.
+	   To compile this driver as a module, choose M here. The module
+	   will be called lis2ds.
+
+config SENSORS_LIS2DS_I2C
+	tristate "STMicroelectronics LIS2DS/LIS2DS12 sensors"
+	depends on (I2C || SPI) && SYSFS
+	help
+	   This driver support the STMicroelectronics LIS2DS/LIS2DS12 sensors.
+	   It is a accelerometer device.
+	   To compile this driver as a module, choose M here. The module
+	   will be called lis2ds.\

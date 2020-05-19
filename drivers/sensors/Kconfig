@@ -1,6 +1,16 @@
+config SENSORS
+	bool "Sensors Class Support"
+	help
+	  This option enables the sensor sysfs class in /sys/class/sensors.
+	  You'll need this to do anything useful with sensorss. If unsure, say N.
+
 config SENSORS_SSC
 	bool "Enable Sensors Driver Support for SSC"
 	help
 	  Add support for sensors SSC driver.
 	  This driver is used for exercising sensors use case,
 	  time syncing with ADSP clock.
+
+source "drivers/sensors/cm36686/Kconfig"
+source "drivers/sensors/lis2ds/Kconfig"
+source "drivers/sensors/stk3328/Kconfig"
