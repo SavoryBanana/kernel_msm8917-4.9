@@ -504,7 +504,7 @@ static void adv7533_parse_vreg_dt(struct device *dev,
 				__func__, rc);
 			goto end;
 		}
-		mp->vreg_config[i].enable_load = val_array[i];
+		mp->vreg_config[i].load[DSS_REG_MODE_ENABLE] = val_array[i];
 
 		memset(val_array, 0, sizeof(u32) * dt_vreg_total);
 		rc = of_property_read_u32_array(of_node,
@@ -515,7 +515,7 @@ static void adv7533_parse_vreg_dt(struct device *dev,
 				__func__, rc);
 			goto end;
 		}
-		mp->vreg_config[i].disable_load = val_array[i];
+		mp->vreg_config[i].load[DSS_REG_MODE_DISABLE] = val_array[i];
 
 		/* post-on-sleep */
 		memset(val_array, 0, sizeof(u32) * dt_vreg_total);
@@ -528,13 +528,13 @@ static void adv7533_parse_vreg_dt(struct device *dev,
 		else
 			mp->vreg_config[i].post_on_sleep = val_array[i];
 
-		pr_debug("%s: %s min=%d, max=%d, enable=%d disable=%d post-on-sleep=%d\n",
+		pr_info("%s: %s min=%d, max=%d, enable=%d disable=%d post-on-sleep=%d\n",
 			__func__,
 			mp->vreg_config[i].vreg_name,
 			mp->vreg_config[i].min_voltage,
 			mp->vreg_config[i].max_voltage,
-			mp->vreg_config[i].enable_load,
-			mp->vreg_config[i].disable_load,
+			mp->vreg_config[i].load[DSS_REG_MODE_ENABLE],
+			mp->vreg_config[i].load[DSS_REG_MODE_DISABLE],
 			mp->vreg_config[i].post_on_sleep);
 	}
 
@@ -700,7 +700,7 @@ static int adv7533_gpio_configure(struct adv7533 *pdata, bool on)
 		}
 
 		return 0;
-	}
+	} else {
 	if (gpio_is_valid(pdata->irq_gpio))
 		gpio_free(pdata->irq_gpio);
 	if (gpio_is_valid(pdata->hpd_irq_gpio))
