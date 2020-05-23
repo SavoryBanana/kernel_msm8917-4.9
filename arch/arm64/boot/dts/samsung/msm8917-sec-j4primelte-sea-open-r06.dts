@@ -14,6 +14,7 @@
 /dts-v1/;
 
 #include "../qcom/msm8917.dtsi"
+#include "../qcom/msm8917-audio.dtsi"
 #include "msm8917-sec-j4primelte-sea-open-r06.dtsi"
 
 / {
