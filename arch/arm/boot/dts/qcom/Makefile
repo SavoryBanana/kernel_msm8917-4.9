@@ -37,8 +37,8 @@ dtb-$(CONFIG_ARCH_MDM9607) += mdm9607-mtp.dtb \
 	mdm9607-ttp.dtb
 
 targets += dtbs
-include $(srctree)/arch/arm64/boot/dts/samsung/Makefile
-$(obj)/%.dtb: $(src)/../../../../arm64/boot/dts/samsung/%.dts FORCE
+include $(srctree)/arch/arm/boot/dts/samsung/Makefile
+$(obj)/%.dtb: $(src)/../../../../arm/boot/dts/samsung/%.dts FORCE
 	$(call if_changed_dep,dtc)
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)

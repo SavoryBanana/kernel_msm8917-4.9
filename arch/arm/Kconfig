@@ -1262,6 +1262,7 @@ config ARM_ERRATA_852423
 endmenu
 
 source "arch/arm/common/Kconfig"
+source "arch/arm/Kconfig.projects"
 
 menu "Bus support"
 
