@@ -958,7 +958,15 @@ dtb-$(CONFIG_ARCH_ASPEED) += aspeed-bmc-opp-palmetto.dtb \
 endif
 
 dtstree		:= $(srctree)/$(src)
-dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(wildcard $(dtstree)/*.dts))
+ifeq ($(CONFIG_DTS_SAMSUNG),y)
+dts-dirs += samsung
+
+subdir-y	:= $(dts-dirs)
+
+dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(foreach d,$(dts-dirs), $(wildcard $(dtstree)/$(d)/*.dts)))
+else
+dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree))/%.dts,%.dtb, $(wildcard $(dtstree)/*.dts))
+endif
 
 DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
 ifneq ($(DTB_NAMES),)
